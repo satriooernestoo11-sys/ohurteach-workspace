@@ -67,35 +67,35 @@
   "members": [
     {
       "id": "ohurteach-workspace-team-lead",
-      "displayName": { "en": "Wei", "zh": "魏周全" },
+      "displayName": { "en": "Raka", "zh": "Raka" },
       "profession": { "en": "Learning Content Director", "zh": "教学内容总监" },
       "avatar": "avatars/ohurteach-workspace-team-lead.png",
       "role": "lead"
     },
     {
       "id": "ohurteach-workspace-researcher",
-      "displayName": { "en": "Xu", "zh": "许求证" },
+      "displayName": { "en": "Rani", "zh": "Rani" },
       "profession": { "en": "Source Researcher", "zh": "来源研究员" },
       "avatar": "avatars/ohurteach-workspace-researcher.png",
       "role": "member"
     },
     {
       "id": "ohurteach-workspace-planner",
-      "displayName": { "en": "Lu", "zh": "陆学程" },
+      "displayName": { "en": "Dimas", "zh": "Dimas" },
       "profession": { "en": "Learning Planner", "zh": "学习规划师" },
       "avatar": "avatars/ohurteach-workspace-planner.png",
       "role": "member"
     },
     {
       "id": "ohurteach-workspace-writer",
-      "displayName": { "en": "Wen", "zh": "温思源" },
+      "displayName": { "en": "Nara", "zh": "Nara" },
       "profession": { "en": "Learning Content Writer", "zh": "教学内容撰稿人" },
       "avatar": "avatars/ohurteach-workspace-writer.png",
       "role": "member"
     },
     {
       "id": "ohurteach-workspace-reviewer",
-      "displayName": { "en": "Ji", "zh": "纪守规" },
+      "displayName": { "en": "Sinta", "zh": "Sinta" },
       "profession": { "en": "Rule Pack Reviewer", "zh": "规则审核员" },
       "avatar": "avatars/ohurteach-workspace-reviewer.png",
       "role": "member"
