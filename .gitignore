@@ -10,6 +10,8 @@
 !settings.json
 !.codebuddy-plugin/plugin.json
 !agents/*.md
+!skills/
+!skills/**
 !avatars/.gitkeep
 !avatars/*.png
 !avatars/*.jpg

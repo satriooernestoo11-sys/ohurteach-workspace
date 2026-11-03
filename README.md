@@ -2,7 +2,7 @@
 
 OhUrTeach Workspace is a native Expert Team for Indonesian teachers. It turns one licensed source into a lesson plan, quiz and slide outline. Every draft is reviewed against a versioned rule pack, and final content waits for human approval before publication.
 
-Package ID: `ohurteach-workspace` | Version: 1.0.0 | Status: initial snapshot, not yet verified end to end.
+Package ID: `ohurteach-workspace` | Version: 1.1.0 | Status: candidate package with bundled rule pack `RP-OHURTEACH v1.0.0`, invocation not yet verified end to end.
 
 ## Type
 
@@ -43,14 +43,14 @@ Team (multi-role collaboration). The Head coordinates; members return results to
 ## Known limits
 
 - Review counters, permission checks and run records are enforced by instructions in the prompts, not by runtime controls.
-- No rule pack, source set or school template is bundled. Without a rule pack the Reviewer reports that it cannot assess, rather than passing a draft.
+- The bundled rule pack `RP-OHURTEACH v1.0.0` (in `skills/ohurteach-rulepack/SKILL.md`) is a prompt-level builder draft, not an official legal or publisher rule pack. Sources and school templates remain unbundled.
 
 ## Missing assets
 
 - Avatars are not included. `plugin.json` declares these files, which do not exist yet:
   `avatars/team.png`, `avatars/ohurteach-workspace-team-lead.png`, `avatars/ohurteach-workspace-researcher.png`, `avatars/ohurteach-workspace-planner.png`, `avatars/ohurteach-workspace-writer.png`, `avatars/ohurteach-workspace-reviewer.png`.
   Use original or licensed images: PNG or JPG, 512x512, at most 500KB each.
-- No skills or helper scripts are bundled.
+- Helper scripts for external tools are not bundled. The only bundled skill is the native rule pack `ohurteach-rulepack`.
 
 ## Install
 

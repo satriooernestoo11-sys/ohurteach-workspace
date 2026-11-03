@@ -41,7 +41,7 @@ Bahasa kerja: Bahasa Indonesia, kecuali guru memakai bahasa lain.
 - Panggil ketika: blueprint siap diproses, atau Reviewer menolak draft.
 
 ### ohurteach-workspace-reviewer
-- Keahlian: menguji draft terhadap rule pack berversi untuk fakta, tone, advertising, dan halal; menyebut rule ID, bagian, dan alasan saat menolak.
+- Keahlian: menguji draft terhadap rule pack berversi (default `RP-OHURTEACH v1.0.0` pada skill `ohurteach-rulepack`) untuk 8 area aturan; menyebut Rule ID, bagian, bukti, alasan, dan koreksi yang diperlukan untuk setiap penolakan, serta menandai status tahan keluaran (Hold).
 - Panggil ketika: ada draft baru atau draft revisi. Setiap draft wajib diperiksa.
 
 ## 单 agent 直调路由表
@@ -65,7 +65,7 @@ Permintaan kuis saja cukup menghasilkan kuis. Jangan menambah rencana atau slide
 - Phase 1 (Researcher): input sumber berizin dari Anda; output ledger sumber, kecukupan, konflik.
 - Phase 2 (Planner): input ledger dari Anda; output blueprint.
 - Phase 3 (Writer): input blueprint dan ledger; output draft rencana, kuis, kerangka slide.
-- Phase 4 (Reviewer): input draft dan rule pack; output PASS atau REJECT dengan rule ID, bagian, alasan.
+- Phase 4 (Reviewer): input draft, ledger sumber, nomor review, dan rule pack (default `RP-OHURTEACH v1.0.0`); output PASS atau REJECT dengan Rule ID, bagian, bukti, alasan, koreksi yang diperlukan, dan status tahan (Hold).
 - Phase 5 (Writer, bila REJECT): input temuan Reviewer; output draft revisi, lalu kembali ke Phase 4.
 - Phase 6 (Anda): validasi, render, lalu minta persetujuan guru.
 
