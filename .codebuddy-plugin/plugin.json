@@ -1,0 +1,104 @@
+{
+  "name": "ohurteach-workspace",
+  "version": "1.0.0",
+  "description": "A native Expert Team that turns one licensed source into a lesson plan, quiz and slide outline for Indonesian teachers, with rule-pack review and human approval before any publication.",
+  "author": {
+    "name": "OhUrTeach"
+  },
+  "keywords": ["education", "teacher", "lesson-plan", "quiz", "compliance-review", "indonesia"],
+  "agents": [
+    "./agents/ohurteach-workspace-team-lead.md",
+    "./agents/ohurteach-workspace-researcher.md",
+    "./agents/ohurteach-workspace-planner.md",
+    "./agents/ohurteach-workspace-writer.md",
+    "./agents/ohurteach-workspace-reviewer.md"
+  ],
+
+  "expertType": "team",
+  "agentName": "ohurteach-workspace-team-lead",
+  "teamInfo": {
+    "leadAgent": "ohurteach-workspace-team-lead",
+    "memberAgents": [
+      "ohurteach-workspace-researcher",
+      "ohurteach-workspace-planner",
+      "ohurteach-workspace-writer",
+      "ohurteach-workspace-reviewer"
+    ]
+  },
+
+  "displayName": {
+    "en": "OhUrTeach Workspace",
+    "zh": "OhUrTeach Workspace"
+  },
+  "profession": {
+    "en": "OhUrTeach Workspace",
+    "zh": "OhUrTeach Workspace"
+  },
+  "displayDescription": {
+    "en": "Helps Indonesian teachers turn one licensed source into a lesson plan, quiz and slide outline. Every draft is checked against a versioned rule pack and waits for teacher approval.",
+    "zh": "面向印尼教师，把单一授权教材转成教案、测验与幻灯片大纲，规则审核把关，教师批准后才发布。"
+  },
+  "avatar": "avatars/team.png",
+  "categoryId": "06-ContentCreative",
+  "defaultInitPrompt": {
+    "zh": "请把我提供的教材来源转成教案、测验和幻灯片大纲，并用印尼语与我沟通。",
+    "en": "Turn the source material I provide into a lesson plan, quiz and slide outline, and communicate with me in Indonesian."
+  },
+  "plugin": "ohurteach-workspace",
+  "tags": [
+    { "en": "Lesson Planning", "zh": "教案设计" },
+    { "en": "Quiz Design", "zh": "测验命题" },
+    { "en": "Compliance Review", "zh": "内容合规审核" }
+  ],
+  "quickPrompts": [
+    {
+      "en": "Turn the source material I provide into a lesson plan, quiz and slide outline, and communicate with me in Indonesian.",
+      "zh": "请把我提供的教材来源转成教案、测验和幻灯片大纲，并用印尼语与我沟通。"
+    },
+    {
+      "en": "Make a quiz only from my licensed material, with the teacher key kept separate from the student file.",
+      "zh": "只用我授权的材料出一份测验，教师答案与学生文件分开保存。"
+    },
+    {
+      "en": "Fill my school template using a copy, and check layout before and after.",
+      "zh": "用副本把内容填入学校模板，并检查填写前后的版式。"
+    }
+  ],
+  "members": [
+    {
+      "id": "ohurteach-workspace-team-lead",
+      "displayName": { "en": "Wei", "zh": "魏周全" },
+      "profession": { "en": "Learning Content Director", "zh": "教学内容总监" },
+      "avatar": "avatars/ohurteach-workspace-team-lead.png",
+      "role": "lead"
+    },
+    {
+      "id": "ohurteach-workspace-researcher",
+      "displayName": { "en": "Xu", "zh": "许求证" },
+      "profession": { "en": "Source Researcher", "zh": "来源研究员" },
+      "avatar": "avatars/ohurteach-workspace-researcher.png",
+      "role": "member"
+    },
+    {
+      "id": "ohurteach-workspace-planner",
+      "displayName": { "en": "Lu", "zh": "陆学程" },
+      "profession": { "en": "Learning Planner", "zh": "学习规划师" },
+      "avatar": "avatars/ohurteach-workspace-planner.png",
+      "role": "member"
+    },
+    {
+      "id": "ohurteach-workspace-writer",
+      "displayName": { "en": "Wen", "zh": "温思源" },
+      "profession": { "en": "Learning Content Writer", "zh": "教学内容撰稿人" },
+      "avatar": "avatars/ohurteach-workspace-writer.png",
+      "role": "member"
+    },
+    {
+      "id": "ohurteach-workspace-reviewer",
+      "displayName": { "en": "Ji", "zh": "纪守规" },
+      "profession": { "en": "Rule Pack Reviewer", "zh": "规则审核员" },
+      "avatar": "avatars/ohurteach-workspace-reviewer.png",
+      "role": "member"
+    }
+  ]
+}

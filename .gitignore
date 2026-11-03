@@ -1,0 +1,18 @@
+# Allowlist distribusi: abaikan semuanya, lalu izinkan hanya komponen runtime.
+*
+
+# Direktori boleh ditelusuri
+!*/
+
+# File yang diizinkan
+!.gitignore
+!README.md
+!settings.json
+!.codebuddy-plugin/plugin.json
+!agents/*.md
+!avatars/.gitkeep
+!avatars/*.png
+!avatars/*.jpg
+
+# Tetap dikecualikan walau cocok pola di atas
+.created-by-session
