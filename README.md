@@ -2,7 +2,7 @@
 
 OhUrTeach Workspace is a native Expert Team for Indonesian teachers. It turns one licensed source into a lesson plan, quiz and slide outline. Every draft is reviewed against a versioned rule pack, and final content waits for human approval before publication.
 
-Package ID: `ohurteach-workspace` | Version: 1.1.2 | Status: candidate package with bundled rule pack `RP-OHURTEACH v1.0.2`, structured DOCX and quiz formats prepared, editable PPTX pending presentation engine, invocation not yet verified end to end.
+Package ID: `ohurteach-workspace` | Version: 1.1.3 | Status: candidate package with bundled rule pack `RP-OHURTEACH v1.0.2`, deterministic quiz export skill `ohurteach-quiz-export`, structured DOCX and quiz formats prepared, editable PPTX pending presentation engine, invocation not yet verified end to end.
 
 ## Type
 
@@ -51,7 +51,7 @@ Team (multi-role collaboration). The Head coordinates; members return results to
 - Avatars are not included. `plugin.json` declares these files, which do not exist yet:
   `avatars/team.png`, `avatars/ohurteach-workspace-team-lead.png`, `avatars/ohurteach-workspace-researcher.png`, `avatars/ohurteach-workspace-planner.png`, `avatars/ohurteach-workspace-writer.png`, `avatars/ohurteach-workspace-reviewer.png`.
   Use original or licensed images: PNG or JPG, 512x512, at most 500KB each.
-- Helper scripts for external tools are not bundled. The only bundled skill is the native rule pack `ohurteach-rulepack`.
+- Helper scripts for external tools are not bundled. Bundled skills include the native rule pack `ohurteach-rulepack` and the deterministic quiz exporter `ohurteach-quiz-export`.
 
 ## Install
 

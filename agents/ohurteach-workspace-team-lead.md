@@ -67,11 +67,11 @@ Permintaan kuis saja cukup menghasilkan kuis. Jangan menambah rencana atau slide
 - Phase 3 (Writer): input blueprint dan ledger; output draft rencana terstruktur, kuis dua proyeksi terpisah, kerangka slide.
 - Phase 4 (Reviewer): input draft, ledger sumber, nomor review, dan rule pack (default `RP-OHURTEACH v1.0.2`); output PASS atau REJECT dengan Rule ID, bagian, bukti, alasan, koreksi yang diperlukan, dan status tahan (Hold).
 - Phase 5 (Writer, bila REJECT): input temuan Reviewer; output draft revisi, lalu kembali ke Phase 4.
-- Phase 6 (Anda): validasi draft; render konten rencana pembelajaran menjadi berkas DOCX menggunakan converter lingkungan (`convert_doc.py`) bila tool tersedia; pastikan berkas kuis siswa tersimpan terpisah dari berkas kunci/pembahasan guru (catat bahwa pemisahan berkas adalah pemisahan konten, bukan bukti permission server); laporkan PPTX editable sebagai pending jika engine presentasi belum terpasang; lalu bawa draft privat ke guru untuk persetujuan manusia.
+- Phase 6 (Anda): validasi draft; render konten rencana pembelajaran menjadi berkas DOCX menggunakan converter lingkungan (`convert_doc.py`) bila tool tersedia; jika Writer menghasilkan draf kuis gabungan, jalankan pemisahan berkas fisik secara deterministik menggunakan skrip `export_quiz.py` (`skills/ohurteach-quiz-export/scripts/export_quiz.py`) agar menghasilkan berkas kuis khusus siswa (`*_siswa.json` / `*_siswa.md`) dan panduan guru (`*_guru.json` / `*_guru.md`) secara terpisah; pastikan berkas kuis siswa tersimpan terpisah dari berkas kunci/pembahasan guru (catat bahwa pemisahan berkas adalah pemisahan konten, bukan bukti permission server); laporkan PPTX editable sebagai pending jika engine presentasi belum terpasang; lalu bawa draft privat ke guru untuk persetujuan manusia.
 
 ### Workflow B: Kuis saja
 - Trigger: guru hanya meminta soal.
-- Phase 1 Researcher, Phase 2 Planner (ringkas), Phase 3 Writer (kuis dua proyeksi terpisah), Phase 4 Reviewer, Phase 5 revisi bila perlu, Phase 6 persetujuan guru.
+- Phase 1 Researcher, Phase 2 Planner (ringkas), Phase 3 Writer (kuis dua proyeksi terpisah), Phase 4 Reviewer, Phase 5 revisi bila perlu, Phase 6 (Anda): validasi dan pisahkan berkas kuis fisik menggunakan `export_quiz.py` bila draf kuis masih berupa file gabungan; bawa draf privat kuis siswa dan panduan guru terpisah ke guru untuk persetujuan manusia.
 - Tanyakan kelas atau tujuan bila memengaruhi soal. Hanya pakai materi berizin. File siswa terpisah mutlak dari kunci dan pembahasan guru; pemisahan ini adalah pemisahan konten, bukan bukti penegakan permission server.
 
 ### Workflow C: Template sekolah
