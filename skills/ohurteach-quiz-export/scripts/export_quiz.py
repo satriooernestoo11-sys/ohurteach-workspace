@@ -10,12 +10,18 @@ Memisahkan berkas kuis gabungan (berisi proyeksi siswa dan guru) menjadi dua ber
    Memuat teks soal, opsi, kunci jawaban, pembahasan, rujukan sumber, rubrik penskoran,
    dan klausul batas privasi/penegakan izin server (R-PRIV-01 v1.0.1 [HOLD]).
 
-Karakteristik & Integritas:
+Karakteristik & Integritas Keamanan:
 - Menggunakan pendekatan Allowlist positif, bukan sekadar regex penghapus kata.
-- Tidak mengubah fakta soal, pilihan, kunci jawaban, atau rujukan sumber.
-- Penanganan error atomik: jika input rusak, proyeksi siswa hilang, atau struktur tidak valid,
-  proses berhenti segera dan TIDAK menghasilkan berkas siswa parsial/menyesatkan.
-  Pesan error disanitasi tanpa membocorkan data sensitif.
+- Validasi tipe dan struktur opsi secara eksplisit: menolak struktur bersarang dalam opsi (dict/list)
+  guna mencegah kebocoran semantik kunci/catatan guru melalui stringifikasi mentah.
+- Rujukan sumber jujur: tidak mengisi sumber fiktif atau fallback bawaan. Jika rujukan tidak ada,
+  ditetapkan sebagai 'sumber belum tersedia' tanpa mengarang kutipan.
+- Panduan guru transparan: jika kunci jawaban belum lengkap, dokumen ditandai secara eksplisit
+  sebagai 'draf_panduan_guru_tidak_lengkap' (kunci_tersedia: false) dengan peringatan jelas.
+- Pencegahan overwrite diam-diam: mewajibkan flag --overwrite jika berkas tujuan sudah ada.
+- Jaminan penulisan: mekanisme staging berkas sementara (.tmp) dan rollback otomatis jika terjadi
+  kegagalan tulis, guna mencegah berkas parsial/menyesatkan tersisa di direktori tujuan.
+  (Catatan: ini adalah mekanisme pertahanan aplikasi, bukan klaim transaksi multi-file ACID tingkat sistem operasi).
 - Memasukkan klausul resmi bahwa pemisahan berkas adalah pemisahan level dokumen,
   bukan klaim kontrol izin server di level infrastruktur/LMS.
 """
@@ -48,15 +54,18 @@ STUDENT_QUESTION_ALLOWLIST = {
     "pilihan"
 }
 
-STUDENT_CHOICE_ALLOWLIST = {
+ALLOWED_CHOICE_KEYS = {
     "opsi",
-    "teks"
+    "teks",
+    "label",
+    "text"
 }
 
 FORBIDDEN_LEAK_KEYS = {
     "kunci",
     "kunci_jawaban",
     "jawaban_benar",
+    "jawaban",
     "pembahasan",
     "analisis_distraktor",
     "rubrik",
@@ -65,9 +74,14 @@ FORBIDDEN_LEAK_KEYS = {
     "bobot",
     "nilai",
     "catatan_guru",
+    "catatan_rahasia_guru",
     "pedoman_penskoran",
     "rujukan_sumber",
-    "bukti_sumber"
+    "bukti_sumber",
+    "evaluasi_pengawas",
+    "teacher_internal",
+    "teacher_notes",
+    "teacher_pedagogy_notes"
 }
 
 SERVER_BOUNDARY_CLAUSE = (
@@ -83,9 +97,86 @@ class QuizExportError(Exception):
     pass
 
 
+def validate_choice_list(idx: int, choice_list: List[Any], field_name: str) -> None:
+    """Validates list-based choices to prevent nested structures or leak keys."""
+    for c_idx, item in enumerate(choice_list, 1):
+        if isinstance(item, (str, int, float)):
+            # Primitive choice text is allowed
+            continue
+        elif isinstance(item, dict):
+            # Inspect keys inside the choice object
+            for k, v in item.items():
+                k_clean = str(k).strip().lower()
+                # Check against forbidden leak keys
+                for f_key in FORBIDDEN_LEAK_KEYS:
+                    if f_key == k_clean or f_key in k_clean:
+                        raise QuizExportError(
+                            f"Soal nomor {idx} tidak valid: elemen {field_name}[{c_idx}] memuat field sensitif '{k}' dalam objek bersarang."
+                        )
+                # Check against allowed choice keys
+                if k_clean not in ALLOWED_CHOICE_KEYS:
+                    raise QuizExportError(
+                        f"Soal nomor {idx} tidak valid: field '{k}' dalam elemen {field_name}[{c_idx}] tidak dikenali."
+                    )
+                # Check value type: must be primitive
+                if isinstance(v, (dict, list)):
+                    raise QuizExportError(
+                        f"Soal nomor {idx} tidak valid: nilai field '{k}' dalam elemen {field_name}[{c_idx}] berupa struktur bersarang ({type(v).__name__}). Nilai harus berupa teks primitif."
+                    )
+        else:
+            raise QuizExportError(
+                f"Soal nomor {idx} tidak valid: elemen {field_name}[{c_idx}] berupa tipe tidak didukung ({type(item).__name__})."
+            )
+
+
+def validate_question_options(idx: int, q: Dict[str, Any]) -> None:
+    """Explicitly validates the types and structure of question options."""
+    has_options = False
+
+    if "opsi" in q:
+        opsi = q["opsi"]
+        if isinstance(opsi, dict):
+            if len(opsi) < 2:
+                raise QuizExportError(f"Soal nomor {idx} tidak valid: opsi jawaban kurang dari 2.")
+            for opt_key, opt_val in opsi.items():
+                if isinstance(opt_val, (dict, list)):
+                    raise QuizExportError(
+                        f"Soal nomor {idx} tidak valid: nilai opsi '{opt_key}' memuat struktur bersarang ({type(opt_val).__name__}). Nilai opsi harus berupa teks primitif."
+                    )
+                if not isinstance(opt_val, (str, int, float, bool)):
+                    raise QuizExportError(
+                        f"Soal nomor {idx} tidak valid: tipe nilai opsi '{opt_key}' tidak didukung ({type(opt_val).__name__})."
+                    )
+            has_options = True
+        elif isinstance(opsi, list):
+            if len(opsi) < 2:
+                raise QuizExportError(f"Soal nomor {idx} tidak valid: opsi jawaban kurang dari 2.")
+            validate_choice_list(idx, opsi, field_name="opsi")
+            has_options = True
+        else:
+            raise QuizExportError(
+                f"Soal nomor {idx} tidak valid: field 'opsi' harus berupa dict atau list, bukan {type(opsi).__name__}."
+            )
+
+    if not has_options and "pilihan" in q:
+        pilihan = q["pilihan"]
+        if isinstance(pilihan, list):
+            if len(pilihan) < 2:
+                raise QuizExportError(f"Soal nomor {idx} tidak valid: pilihan jawaban kurang dari 2.")
+            validate_choice_list(idx, pilihan, field_name="pilihan")
+            has_options = True
+        else:
+            raise QuizExportError(
+                f"Soal nomor {idx} tidak valid: field 'pilihan' harus berupa list, bukan {type(pilihan).__name__}."
+            )
+
+    if not has_options:
+        raise QuizExportError(f"Soal nomor {idx} tidak valid: opsi/pilihan jawaban kurang dari 2 atau tidak terdefinisi.")
+
+
 def parse_and_validate_input(data: Any) -> Tuple[Dict[str, Any], List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
-    Validates input quiz data and returns (metadata, student_questions, teacher_info).
+    Validates input quiz data and returns (metadata, student_questions, teacher_items).
     Accepts:
       Format A: Dict with 'proyeksi_siswa' and 'proyeksi_guru' (e.g. kuis_fotosintesis.json)
       Format B: Dict with 'butir_soal' or 'kunci_dan_pembahasan' (combined per-item)
@@ -141,21 +232,8 @@ def parse_and_validate_input(data: Any) -> Tuple[Dict[str, Any], List[Dict[str, 
         if not pertanyaan or not isinstance(pertanyaan, str) or not pertanyaan.strip():
             raise QuizExportError(f"Soal nomor {idx} tidak valid: teks pertanyaan kosong atau tidak ditemukan.")
 
-        # Check options
-        has_options = False
-        if "opsi" in q:
-            opsi = q["opsi"]
-            if isinstance(opsi, dict) and len(opsi) >= 2:
-                has_options = True
-            elif isinstance(opsi, list) and len(opsi) >= 2:
-                has_options = True
-        if not has_options and "pilihan" in q:
-            pilihan = q["pilihan"]
-            if isinstance(pilihan, list) and len(pilihan) >= 2:
-                has_options = True
-
-        if not has_options:
-            raise QuizExportError(f"Soal nomor {idx} tidak valid: opsi/pilihan jawaban kurang dari 2 atau tidak terdefinisi.")
+        # Explicitly validate options structure and types
+        validate_question_options(idx, q)
 
     return metadata, student_questions, teacher_items
 
@@ -191,6 +269,10 @@ def build_student_projection(metadata: Dict[str, Any], raw_questions: List[Dict[
         if "opsi" in q and isinstance(q["opsi"], dict):
             clean_opsi = {}
             for opt_key, opt_val in q["opsi"].items():
+                if isinstance(opt_val, (dict, list)):
+                    raise QuizExportError(
+                        f"Soal nomor {idx} tidak valid: opsi '{opt_key}' memuat struktur bersarang."
+                    )
                 clean_opsi[str(opt_key).strip().upper()] = str(opt_val).strip()
             item["opsi"] = clean_opsi
 
@@ -199,24 +281,38 @@ def build_student_projection(metadata: Dict[str, Any], raw_questions: List[Dict[
             for p in q["pilihan"]:
                 if isinstance(p, dict):
                     p_clean = {}
-                    for pk in ("opsi", "teks"):
+                    for pk in ("opsi", "teks", "label", "text"):
                         if pk in p:
-                            p_clean[pk] = str(p[pk]).strip()
+                            val = p[pk]
+                            if isinstance(val, (dict, list)):
+                                raise QuizExportError(f"Soal nomor {idx} tidak valid: opsi memuat struktur bersarang.")
+                            norm_key = "opsi" if pk in ("opsi", "label") else "teks"
+                            p_clean[norm_key] = str(val).strip()
                     if p_clean:
                         clean_pilihan.append(p_clean)
+                elif isinstance(p, (str, int, float)):
+                    clean_pilihan.append({"teks": str(p).strip()})
             item["pilihan"] = clean_pilihan
 
         elif "opsi" in q and isinstance(q["opsi"], list):
             clean_pilihan = []
             for p in q["opsi"]:
                 if isinstance(p, dict):
-                    p_clean = {pk: str(p[pk]).strip() for pk in ("opsi", "teks") if pk in p}
-                    clean_pilihan.append(p_clean)
-                else:
+                    p_clean = {}
+                    for pk in ("opsi", "teks", "label", "text"):
+                        if pk in p:
+                            val = p[pk]
+                            if isinstance(val, (dict, list)):
+                                raise QuizExportError(f"Soal nomor {idx} tidak valid: opsi memuat struktur bersarang.")
+                            norm_key = "opsi" if pk in ("opsi", "label") else "teks"
+                            p_clean[norm_key] = str(val).strip()
+                    if p_clean:
+                        clean_pilihan.append(p_clean)
+                elif isinstance(p, (str, int, float)):
                     clean_pilihan.append({"teks": str(p).strip()})
             item["pilihan"] = clean_pilihan
 
-        # Strict assertion on filtered keys
+        # Strict assertion on filtered question keys
         for key in item.keys():
             if key not in STUDENT_QUESTION_ALLOWLIST:
                 raise QuizExportError(f"Pelanggaran allowlist internal: field terlarang '{key}' terdeteksi pada soal {idx}.")
@@ -229,22 +325,29 @@ def build_student_projection(metadata: Dict[str, Any], raw_questions: List[Dict[
         "butir_soal": filtered_questions
     }
 
-    # 3. Post-validation: Verify ZERO leakage in the generated student document
-    def assert_no_leak_keys(obj: Any, path: str = ""):
+    # 3. Post-validation: Verify ZERO leakage in the generated student document (keys and values)
+    def assert_no_leak(obj: Any, path: str = ""):
         if isinstance(obj, dict):
             for k, v in obj.items():
-                k_lower = k.lower()
+                k_lower = str(k).lower()
                 for forbidden in FORBIDDEN_LEAK_KEYS:
                     if forbidden == k_lower or forbidden in k_lower:
                         raise QuizExportError(
                             f"Integritas gagal: field terlarang '{k}' ditemukan pada proyeksi siswa ({path})."
                         )
-                assert_no_leak_keys(v, f"{path}.{k}" if path else k)
+                assert_no_leak(v, f"{path}.{k}" if path else str(k))
         elif isinstance(obj, list):
             for i, elem in enumerate(obj):
-                assert_no_leak_keys(elem, f"{path}[{i}]")
+                assert_no_leak(elem, f"{path}[{i}]")
+        elif isinstance(obj, str):
+            # Guard against stringified leak dicts
+            s_lower = obj.lower()
+            if any(marker in s_lower for marker in ("'kunci':", '"kunci":', "'catatan_guru':", '"catatan_guru":')):
+                raise QuizExportError(
+                    f"Integritas gagal: stringifikasi objek sensitif terdeteksi pada proyeksi siswa ({path})."
+                )
 
-    assert_no_leak_keys(student_doc)
+    assert_no_leak(student_doc)
 
     return student_doc
 
@@ -255,11 +358,11 @@ def build_teacher_projection(
     teacher_items: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
     """
-    Constructs full teacher guide projection with keys, explanations, source citations, rubrics,
+    Constructs full teacher guide projection with keys, explanations, authentic source citations, rubrics,
     and governance boundary clause.
+    Detects missing keys or teacher projections and marks incomplete guides explicitly.
     """
     teacher_meta = dict(metadata)
-    teacher_meta["status_dokumen"] = "draft_khusus_guru"
     teacher_meta["catatan_tata_kelola"] = SERVER_BOUNDARY_CLAUSE
 
     # Index teacher info by nomor or id_soal if provided separately
@@ -273,6 +376,9 @@ def build_teacher_projection(
                 teacher_by_num[item["nomor"]] = item
 
     merged_teacher_guide = []
+    missing_keys = []
+    total_questions = len(student_questions)
+
     for idx, sq in enumerate(student_questions, 1):
         num = sq.get("nomor", idx)
         id_soal = str(sq.get("id_soal", f"Q-{idx:02d}"))
@@ -280,7 +386,7 @@ def build_teacher_projection(
         # Find matching teacher item
         ti = teacher_by_id.get(id_soal) or teacher_by_num.get(num) or {}
 
-        guide_item = {
+        guide_item: Dict[str, Any] = {
             "nomor": num,
             "id_soal": id_soal,
             "pertanyaan": sq.get("pertanyaan", "")
@@ -292,19 +398,39 @@ def build_teacher_projection(
         elif "pilihan" in sq:
             guide_item["pilihan"] = sq["pilihan"]
 
-        # Include key & answer details
-        guide_item["kunci_jawaban"] = ti.get("kunci_jawaban") or sq.get("kunci_jawaban", "")
+        # Include key & answer details - NO fabricated defaults
+        raw_kunci = ti.get("kunci_jawaban") or sq.get("kunci_jawaban")
+        has_kunci = bool(raw_kunci is not None and str(raw_kunci).strip())
+
+        if not has_kunci:
+            missing_keys.append(num)
+            guide_item["kunci_jawaban"] = None
+            guide_item["kunci_tersedia"] = False
+            guide_item["status_kunci"] = "kunci_belum_tersedia"
+        else:
+            guide_item["kunci_jawaban"] = str(raw_kunci).strip()
+            guide_item["kunci_tersedia"] = True
+            guide_item["status_kunci"] = "tersedia"
+
         if "teks_kunci_jawaban" in ti:
             guide_item["teks_kunci_jawaban"] = ti["teks_kunci_jawaban"]
         elif "teks_kunci_jawaban" in sq:
             guide_item["teks_kunci_jawaban"] = sq["teks_kunci_jawaban"]
 
-        # Rujukan sumber
-        guide_item["rujukan_sumber"] = ti.get("rujukan_sumber") or sq.get("rujukan_sumber", "MOCK-SOURCE-FORMAT-02")
-        if "bukti_sumber" in ti:
-            guide_item["bukti_sumber"] = ti["bukti_sumber"]
-        elif "bukti_sumber" in sq:
-            guide_item["bukti_sumber"] = sq["bukti_sumber"]
+        # Rujukan sumber - strictly preserve authentic reference or mark 'sumber belum tersedia'
+        # NEVER invent or inject default sources like 'MOCK-SOURCE-FORMAT-02'
+        raw_ref = ti.get("rujukan_sumber") or sq.get("rujukan_sumber") or metadata.get("rujukan_sumber") or metadata.get("sumber")
+        if raw_ref is None or (isinstance(raw_ref, str) and not raw_ref.strip()):
+            guide_item["rujukan_sumber"] = "sumber belum tersedia"
+            guide_item["status_rujukan"] = "belum_tersedia"
+        else:
+            guide_item["rujukan_sumber"] = raw_ref
+            guide_item["status_rujukan"] = "tersedia"
+
+        # Bukti sumber - only if authentically provided
+        raw_proof = ti.get("bukti_sumber") or sq.get("bukti_sumber") or metadata.get("bukti_sumber")
+        if raw_proof and (isinstance(raw_proof, str) and raw_proof.strip()):
+            guide_item["bukti_sumber"] = raw_proof.strip()
 
         # Pembahasan
         guide_item["pembahasan"] = ti.get("pembahasan") or sq.get("pembahasan", "")
@@ -324,6 +450,22 @@ def build_teacher_projection(
             guide_item["skor"] = ti.get("skor", sq.get("skor", 50))
 
         merged_teacher_guide.append(guide_item)
+
+    # Document completeness evaluation
+    if missing_keys:
+        teacher_meta["status_dokumen"] = "draf_panduan_guru_tidak_lengkap"
+        teacher_meta["kunci_tersedia"] = False
+        teacher_meta["jumlah_soal_tanpa_kunci"] = len(missing_keys)
+        teacher_meta["daftar_nomor_tanpa_kunci"] = missing_keys
+        teacher_meta["peringatan"] = (
+            f"PERINGATAN: Dokumen ini adalah draf panduan guru TIDAK LENGKAP. "
+            f"Ditemukan {len(missing_keys)} dari {total_questions} butir soal tanpa kunci jawaban (nomor: {missing_keys}). "
+            f"Dokumen ini belum siap dipublikasikan atau dijadikan acuan penilaian definitif."
+        )
+    else:
+        teacher_meta["status_dokumen"] = "draft_khusus_guru"
+        teacher_meta["kunci_tersedia"] = True
+        teacher_meta["jumlah_soal_tanpa_kunci"] = 0
 
     teacher_doc = {
         "dokumen": "kuis_guru",
@@ -384,16 +526,30 @@ def render_student_markdown(student_doc: Dict[str, Any]) -> str:
 
 
 def render_teacher_markdown(teacher_doc: Dict[str, Any]) -> str:
-    """Renders teacher quiz guide in clean Markdown."""
+    """Renders teacher quiz guide in clean Markdown with honest completeness status."""
     meta = teacher_doc.get("metadata", {})
     lines = []
 
     title = meta.get("judul") or meta.get("topik") or "Panduan Kuis Guru"
-    lines.append(f"# {title} (Khusus Guru)")
-    lines.append("")
-    lines.append("> **Status:** Draf Khusus Guru - Memuat Kunci Jawaban & Pembahasan")
-    lines.append(">")
-    lines.append(f"> **Batasan Akses:** {SERVER_BOUNDARY_CLAUSE}")
+    is_complete = meta.get("kunci_tersedia", True)
+
+    if not is_complete:
+        missing_count = meta.get("jumlah_soal_tanpa_kunci", 0)
+        missing_str = ", ".join(str(n) for n in meta.get("daftar_nomor_tanpa_kunci", []))
+        lines.append(f"# {title} [PERINGATAN: DRAF TIDAK LENGKAP]")
+        lines.append("")
+        lines.append("> ⚠️ **PERINGATAN KERAS: DRAF PANDUAN GURU TIDAK LENGKAP**")
+        lines.append(f"> Status: Kunci jawaban untuk butir nomor [{missing_str}] belum tersedia ({missing_count} butir tanpa kunci).")
+        lines.append("> Dokumen ini BUKAN panduan penilaian lengkap dan TIDAK BOLEH disajikan sebagai berkas final.")
+        lines.append(">")
+        lines.append(f"> **Batasan Akses:** {SERVER_BOUNDARY_CLAUSE}")
+    else:
+        lines.append(f"# {title} (Khusus Guru)")
+        lines.append("")
+        lines.append("> **Status:** Draf Khusus Guru - Memuat Kunci Jawaban & Pembahasan")
+        lines.append(">")
+        lines.append(f"> **Batasan Akses:** {SERVER_BOUNDARY_CLAUSE}")
+
     lines.append("")
     lines.append("---")
     lines.append("")
@@ -401,7 +557,7 @@ def render_teacher_markdown(teacher_doc: Dict[str, Any]) -> str:
     for item in teacher_doc.get("kunci_dan_pembahasan", []):
         nomor = item.get("nomor", "")
         pertanyaan = item.get("pertanyaan", "")
-        kunci = item.get("kunci_jawaban", "")
+        kunci = item.get("kunci_jawaban")
         pembahasan = item.get("pembahasan", "")
         rujukan = item.get("rujukan_sumber", "")
 
@@ -420,19 +576,29 @@ def render_teacher_markdown(teacher_doc: Dict[str, Any]) -> str:
                 lines.append(f"- **{p.get('opsi', '-')}.** {p.get('teks', '')}")
             lines.append("")
 
-        lines.append(f"- **Kunci Jawaban:** **{kunci}**")
-        if isinstance(rujukan, dict):
+        # Render key with honesty
+        if not item.get("kunci_tersedia", True) or kunci is None:
+            lines.append("- **Kunci Jawaban:** **[BELUM TERSEDIA]** *(Kunci jawaban belum dispesifikasikan)*")
+        else:
+            lines.append(f"- **Kunci Jawaban:** **{kunci}**")
+
+        # Render source reference without fabrication
+        if rujukan == "sumber belum tersedia" or not rujukan:
+            lines.append("- **Rujukan Sumber:** *(sumber belum tersedia)*")
+        elif isinstance(rujukan, dict):
             ref_str = f"{rujukan.get('nama_sumber', '')} v{rujukan.get('versi', '')} {rujukan.get('bagian', '')}".strip()
-            lines.append(f"- **Rujukan Sumber:** `{ref_str}`")
-            if "kutipan_teks" in rujukan:
+            lines.append(f"- **Rujukan Sumber:** `{ref_str or 'rujukan terstruktur'}`")
+            if "kutipan_teks" in rujukan and rujukan["kutipan_teks"]:
                 lines.append(f"- **Bukti Kutipan Sumber:** *\"{rujukan['kutipan_teks']}\"*")
         else:
             lines.append(f"- **Rujukan Sumber:** `{rujukan}`")
-            if "bukti_sumber" in item:
+            if "bukti_sumber" in item and item["bukti_sumber"]:
                 lines.append(f"- **Bukti Kutipan Sumber:** *\"{item['bukti_sumber']}\"*")
 
         if pembahasan:
             lines.append(f"- **Pembahasan:** {pembahasan}")
+        else:
+            lines.append("- **Pembahasan:** *(belum tersedia)*")
 
         # Distractor analysis
         if "analisis_distraktor" in item and isinstance(item["analisis_distraktor"], dict):
@@ -458,11 +624,12 @@ def export_quiz_files(
     input_file: str,
     output_dir: str,
     prefix: Optional[str] = None,
-    generate_markdown: bool = True
-) -> Dict[str, str]:
+    generate_markdown: bool = True,
+    overwrite: bool = False
+) -> Dict[str, Any]:
     """
-    Executes the deterministic export. Atomically writes files only upon total success.
-    Returns dict with filepaths created.
+    Executes deterministic quiz export with safe staging, overwrite safeguards, and rollback.
+    Returns dict with filepaths created and status.
     """
     if not os.path.exists(input_file):
         raise QuizExportError(f"Berkas input tidak ditemukan: {os.path.basename(input_file)}")
@@ -472,7 +639,7 @@ def export_quiz_files(
             raw_data = json.load(f)
     except json.JSONDecodeError as e:
         raise QuizExportError(f"Berkas input bukan JSON yang valid: baris {e.lineno}, kolom {e.colno}")
-    except Exception as e:
+    except Exception:
         raise QuizExportError("Gagal membaca berkas input.")
 
     # 1. Parse & validate
@@ -500,32 +667,86 @@ def export_quiz_files(
     student_md_path = os.path.join(output_dir, f"{pfx}_siswa.md")
     teacher_md_path = os.path.join(output_dir, f"{pfx}_guru.md")
 
-    # Serialize JSON
+    target_paths = [student_json_path, teacher_json_path]
+    if generate_markdown:
+        target_paths.extend([student_md_path, teacher_md_path])
+
+    # 4. Check for existing destination files (prevent silent overwrite)
+    if not overwrite:
+        existing_files = [p for p in target_paths if os.path.exists(p)]
+        if existing_files:
+            names = ", ".join(os.path.basename(p) for p in existing_files)
+            raise QuizExportError(
+                f"Berkas tujuan sudah ada ({names}). "
+                f"Gunakan flag '--overwrite' untuk menimpa berkas yang ada secara eksplisit."
+            )
+
+    # 5. Serialize payloads in memory
     student_json_str = json.dumps(student_doc, indent=2, ensure_ascii=False) + "\n"
     teacher_json_str = json.dumps(teacher_doc, indent=2, ensure_ascii=False) + "\n"
 
-    # Write files atomically
-    with open(student_json_path, "w", encoding="utf-8") as f:
-        f.write(student_json_str)
-
-    with open(teacher_json_path, "w", encoding="utf-8") as f:
-        f.write(teacher_json_str)
-
-    results = {
-        "student_json": student_json_path,
-        "teacher_json": teacher_json_path
-    }
+    file_payloads: List[Tuple[str, str]] = [
+        (student_json_path, student_json_str),
+        (teacher_json_path, teacher_json_str)
+    ]
 
     if generate_markdown:
         student_md_str = render_student_markdown(student_doc)
         teacher_md_str = render_teacher_markdown(teacher_doc)
+        file_payloads.append((student_md_path, student_md_str))
+        file_payloads.append((teacher_md_path, teacher_md_str))
 
-        with open(student_md_path, "w", encoding="utf-8") as f:
-            f.write(student_md_str)
+    # 6. Safe Staging & Rollback Mechanism:
+    #    Stage to temporary files first (.tmp_<pid>_<name>).
+    #    If any failure occurs during writing or committing, clean up all staging files
+    #    and rollback any newly created files to avoid leaving partial outputs.
+    staging_files: List[str] = []
+    committed_files: List[str] = []
 
-        with open(teacher_md_path, "w", encoding="utf-8") as f:
-            f.write(teacher_md_str)
+    try:
+        # Step A: Write all payloads to staging files
+        pid = os.getpid()
+        for target_path, content in file_payloads:
+            dirname = os.path.dirname(target_path)
+            basename = os.path.basename(target_path)
+            tmp_path = os.path.join(dirname, f".tmp_{pid}_{basename}")
+            staging_files.append(tmp_path)
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                f.write(content)
 
+        # Step B: Commit staging files to final destinations
+        for (target_path, _), tmp_path in zip(file_payloads, staging_files):
+            os.replace(tmp_path, target_path)
+            committed_files.append(target_path)
+
+    except Exception as write_err:
+        # Rollback: Clean up staging files
+        for tmp in staging_files:
+            if os.path.exists(tmp):
+                try:
+                    os.remove(tmp)
+                except OSError:
+                    pass
+        # Rollback: Clean up committed files created in this failed run
+        for c_path in committed_files:
+            if os.path.exists(c_path):
+                try:
+                    os.remove(c_path)
+                except OSError:
+                    pass
+        raise QuizExportError(
+            f"Gagal menulis berkas ekspor ({type(write_err).__name__}: {write_err}). "
+            f"Pembersihan otomatis dilakukan: tidak ada berkas parsial yang tersisa."
+        )
+
+    results: Dict[str, Any] = {
+        "student_json": student_json_path,
+        "teacher_json": teacher_json_path,
+        "status_panduan_guru": teacher_doc["metadata"].get("status_dokumen", "draft_khusus_guru"),
+        "kunci_tersedia": teacher_doc["metadata"].get("kunci_tersedia", True)
+    }
+
+    if generate_markdown:
         results["student_md"] = student_md_path
         results["teacher_md"] = teacher_md_path
 
@@ -540,6 +761,7 @@ def main():
     parser.add_argument("--out-dir", "-o", required=True, help="Direktori target untuk berkas hasil ekspor")
     parser.add_argument("--prefix", "-p", default=None, help="Prefix nama berkas (default: dari nama berkas input)")
     parser.add_argument("--no-markdown", action="store_true", help="Lewati pembuatan berkas .md (hanya JSON)")
+    parser.add_argument("--overwrite", action="store_true", help="Izinkan menimpa berkas tujuan jika sudah ada")
 
     args = parser.parse_args()
 
@@ -548,7 +770,8 @@ def main():
             input_file=args.input,
             output_dir=args.out_dir,
             prefix=args.prefix,
-            generate_markdown=not args.no_markdown
+            generate_markdown=not args.no_markdown,
+            overwrite=args.overwrite
         )
         print(json.dumps({"success": True, "files": created}, indent=2))
         sys.exit(0)

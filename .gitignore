@@ -18,3 +18,6 @@
 
 # Tetap dikecualikan walau cocok pola di atas
 .created-by-session
+__pycache__/
+*.pyc
+*.pyo
