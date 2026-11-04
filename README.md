@@ -2,7 +2,7 @@
 
 OhUrTeach Workspace is a native Expert Team for Indonesian teachers. It turns one licensed source into a lesson plan, quiz and slide outline. Every draft is reviewed against a versioned rule pack, and final content waits for human approval before publication.
 
-Package ID: `ohurteach-workspace` | Version: 1.1.1 | Status: candidate package with bundled rule pack `RP-OHURTEACH v1.0.1`, invocation not yet verified end to end.
+Package ID: `ohurteach-workspace` | Version: 1.1.2 | Status: candidate package with bundled rule pack `RP-OHURTEACH v1.0.2`, structured DOCX and quiz formats prepared, editable PPTX pending presentation engine, invocation not yet verified end to end.
 
 ## Type
 
@@ -43,7 +43,8 @@ Team (multi-role collaboration). The Head coordinates; members return results to
 ## Known limits
 
 - Review counters, permission checks and run records are enforced by instructions in the prompts, not by runtime controls.
-- The bundled rule pack `RP-OHURTEACH v1.0.1` (in `skills/ohurteach-rulepack/SKILL.md`) is a prompt-level builder draft, not an official legal or publisher rule pack. Sources and school templates remain unbundled.
+- The bundled rule pack `RP-OHURTEACH v1.0.2` (in `skills/ohurteach-rulepack/SKILL.md`) is a prompt-level builder draft, not an official legal or publisher rule pack. Sources and school templates remain unbundled.
+- Output formats: structured lesson plan rendering to DOCX is supported via the WorkBuddy environment converter (`convert_doc.py`); structured quizzes enforce strict physical/content separation between student worksheets and teacher answer guides (without claiming server-level permission enforcement). Editable PPTX presentation generation from slide outline remains pending due to presentation engine unavailability in this environment.
 
 ## Missing assets
 
