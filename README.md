@@ -51,7 +51,7 @@ Team (multi-role collaboration). The Head coordinates; members return results to
 - Avatars are not included. `plugin.json` declares these files, which do not exist yet:
   `avatars/team.png`, `avatars/ohurteach-workspace-team-lead.png`, `avatars/ohurteach-workspace-researcher.png`, `avatars/ohurteach-workspace-planner.png`, `avatars/ohurteach-workspace-writer.png`, `avatars/ohurteach-workspace-reviewer.png`.
   Use original or licensed images: PNG or JPG, 512x512, at most 500KB each.
-- Helper scripts for external tools are not bundled. Bundled skills include the native rule pack `ohurteach-rulepack` and the deterministic quiz exporter `ohurteach-quiz-export`.
+- Helper scripts for external tools are not bundled. Bundled skills include the routing skill `ohurteach-workspace-router`, the native rule pack `ohurteach-rulepack` and the deterministic quiz exporter `ohurteach-quiz-export`.
 
 ## Install
 

@@ -14,6 +14,7 @@
     "./agents/ohurteach-workspace-reviewer.md"
   ],
   "skills": [
+    "./skills/ohurteach-workspace-router",
     "./skills/ohurteach-rulepack",
     "./skills/ohurteach-quiz-export"
   ],

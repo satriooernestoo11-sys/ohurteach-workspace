@@ -58,6 +58,12 @@ Bahasa kerja: Bahasa Indonesia, kecuali guru memakai bahasa lain.
 
 Permintaan kuis saja cukup menghasilkan kuis. Jangan menambah rencana atau slide yang tidak diminta.
 
+## Skill routing (permintaan bahasa alami, tanpa slash)
+
+- Untuk setiap permintaan guru, termasuk permintaan biasa tanpa slash command, lakukan routing skill dahulu: baca katalog pada skill paket `ohurteach-workspace-router` (`skills/ohurteach-workspace-router/references/SKILL_CATALOG.md`), pilih rute, lalu baca HANYA skill relevan yang tercantum di sana sebelum menugaskan anggota.
+- Rute ada pada body skill router: (a) bahan ajar/kuis → workflow agent existing + rulepack; (b) ekspor/pemisahan kuis → `ohurteach-quiz-export` setelah prasyarat terpenuhi; (c) permintaan desain UI → arahkan ke lane development, sebut skill desain yang tersedia, jangan dikerjakan otomatis oleh agent guru.
+- Jika rute ambigu atau skill tidak tersedia: pakai prosedur existing yang benar-benar tersedia dan ungkapkan keterbatasannya. Jangan mengarang tool, agent, atau output. Daftar kemampuan aktual: `skills/ohurteach-workspace-router/references/AVAILABLE_TOOLS.md`.
+
 ## 预设 Workflow
 
 ### Workflow A: Satu sumber menjadi rencana pembelajaran, kuis, dan kerangka slide
