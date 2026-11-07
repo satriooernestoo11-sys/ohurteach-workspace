@@ -21,6 +21,7 @@ Skill ini adalah **router prosedur**, bukan pembuat konten. Ia memastikan Head m
 |---|---|---|---|
 | "Buat rencana pembelajaran/kuis/kerangka slide dari sumber saya" | Workflow agent existing (A/B/C sesuai permintaan) via Researcher→Planner→Writer→Reviewer | `ohurteach-rulepack` (dibaca Reviewer saat menilai draft) | Sumber berizin; konteks jenjang/mapel/tujuan diketahui atau ditanyakan |
 | "Pisahkan/ekspor kuis ini jadi berkas siswa dan guru" | Ekspor deterministik oleh Head (Phase 6) | `ohurteach-quiz-export` | Draft kuis gabungan sudah lolos review; berkas disimpan di folder privat run |
+| "Tampilkan/lanjutkan/ekspor PDF hasil run yang sudah ada" | Lane delivery Head (Phase 6), tanpa regenerasi | `ohurteach-quiz-export` hanya bila berkas hasil belum terpisah | `run_record` + berkas hasil sudah ada dan terverifikasi; konter review dipertahankan |
 | "Bikin/desain tampilan (UI) untuk saya" | **Bukan dikerjakan agent guru secara otomatis.** Arahkan ke lane development; sebut skill desain yang tersedia (Hallmark, antislop-ui, antislop-human, antislop-layoutmobile, antislop-copywriting) dan minta keputusan guru untuk membuka pekerjaan development | tidak ada skill guru yang dimuat | Pekerjaan UI = proyek development terpisah |
 
 ## Pertanyaan konteks
@@ -30,6 +31,10 @@ Tanyakan hanya yang belum diketahui: (1) sumber berizin untuk tugas ini; (2) jen
 ## Template-preservation
 
 Jika format baku (template sekolah, format dokumen asli guru) belum terbukti dapat dipertahankan pada keluaran, **jangan menjanjikan format identik dan jangan menimpa sumber**. Kerjakan pada salinan, catat pemeriksaan tata letak sebelum/sesudah, dan laporkan perbedaan yang teramati.
+
+## Kontrak komunikasi hasil dan serah-terima PDF (ringkas)
+
+Router mengarahkan Head ke "## Kontrak serah-terima ke guru (Phase 6)" pada prompt Head untuk rincian. Ringkasnya: satu kalimat hasil di awal; update hanya bila ada informasi baru; verdict Reviewer disampaikan di chat guru; pada tahap serah-terima setelah review, jadikan PDF format utama untuk RPP, lembar kuis siswa (Zero Key Leakage), dan panduan guru (privat pemilik draf) menggunakan renderer lokal yang tersedia, sementara Markdown/JSON dipertahankan sebagai sumber kerja; tampilkan 3 berkas aktual di chat guru (present/attach bila tersedia, atau path absolut yang valid); bila renderer lokal belum tersedia, serahkan Markdown sementara dengan status `PDF_PENDING` dan sebutkan kendalanya; final memuat ringkasan 2–3 kalimat, batas, status pending approval, selisih/errata durasi bila ada (tanpa ubah artefak diam-diam), dan satu pertanyaan keputusan. Bila berkas belum valid, nyatakan PARTIAL/WAITING dengan blocker, bukan DONE. Router tidak menduplikasi aturan sumber, izin, privasi, atau approval.
 
 ## Aturan yang tetap berlaku (tidak diduplikasi di sini)
 
