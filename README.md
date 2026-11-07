@@ -2,11 +2,17 @@
 
 OhUrTeach Workspace is a native Expert Team for Indonesian teachers. It turns one licensed source into a lesson plan, quiz and slide outline. Every draft is reviewed against a versioned rule pack, and final content waits for human approval before publication.
 
-Package ID: `ohurteach-workspace` | Version: 1.1.8 | Status: candidate package with intake-first Fresh Summon flow, canonical LMS Library MCP integration (`https://out.satz11.my.id`, synthetic source `BIO-01-v1`), bundled rule pack `RP-OHURTEACH v1.0.3`, deterministic quiz export skill `ohurteach-quiz-export`, routing skill `ohurteach-workspace-router`, PDF primary delivery contract (with Markdown/JSON working sources and DOCX support), editable PPTX pending presentation engine, invocation verified in native Summon sessions.
+Package ID: `ohurteach-workspace` | Version: 1.1.4 | Status: candidate package with bundled rule pack `RP-OHURTEACH v1.0.3`, deterministic quiz export skill `ohurteach-quiz-export`, routing skill `ohurteach-workspace-router`, PDF primary delivery contract (with Markdown/JSON working sources and DOCX support), editable PPTX pending presentation engine, invocation verified in native Summon sessions.
 
 ## Type
 
 Team (multi-role collaboration). The Head coordinates; members return results to the Head.
+
+## Install
+
+Only copy this command to your workbuddy!
+
+I created an expert "OhUrTeach Workspace" with WorkBuddy AI — Helps Indonesian teachers turn one licensed source into a lesson plan, quiz and slide outline. Every draft is checked against a versioned rule pack and waits for teacher approval. Click https://www.workbuddy.ai/work/launch/?sharecode=d9rLMvJTR17oKP8ESLIao2a0D-6dQsn_aYyflyOnxBosesD2U-eBLoTvz1yKsHE-&expertname=OhUrTeach+Workspace&buddy_type=workbuddy-ai to use it!
 
 ## Members
 
@@ -53,6 +59,4 @@ Team (multi-role collaboration). The Head coordinates; members return results to
   Use original or licensed images: PNG or JPG, 512x512, at most 500KB each.
 - Helper scripts for external tools are not bundled. Bundled skills include the routing skill `ohurteach-workspace-router`, the native rule pack `ohurteach-rulepack` and the deterministic quiz exporter `ohurteach-quiz-export`.
 
-## Install
 
-Place this folder under `<WORKBUDDY_CONFIG_DIR>/plugins/marketplaces/my-experts/plugins/` and register it with the expert-manager registration script.
