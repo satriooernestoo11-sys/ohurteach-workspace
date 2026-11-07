@@ -56,3 +56,11 @@ Team (multi-role collaboration). The Head coordinates; members return results to
 ## Install
 
 Place this folder under `<WORKBUDDY_CONFIG_DIR>/plugins/marketplaces/my-experts/plugins/` and register it with the expert-manager registration script.
+
+## Source repository
+
+The reviewed public source is available at <https://github.com/satriooernestoo11-sys/ohurteach-workspace>. The distribution allowlist keeps private logs, data and credentials out of the public repository.
+
+## License
+
+MIT. See `LICENSE`.
