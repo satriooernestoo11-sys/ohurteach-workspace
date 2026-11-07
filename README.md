@@ -8,6 +8,16 @@ Package ID: `ohurteach-workspace` | Version: 1.1.8 | Status: candidate package w
 
 Team (multi-role collaboration). The Head coordinates; members return results to the Head.
 
+## Install
+
+Place this folder under `<WORKBUDDY_CONFIG_DIR>/plugins/marketplaces/my-experts/plugins/` and register it with the expert-manager registration script.
+
+## Shared expert quick launch
+
+Only copy this command to your workbuddy!
+
+I created an expert "OhUrTeach Workspace" with WorkBuddy AI — Helps Indonesian teachers turn one licensed source into a lesson plan, quiz and slide outline. Every draft is checked against a versioned rule pack and waits for teacher approval. Click https://www.workbuddy.ai/work/launch/?sharecode=d9rLMvJTR17oKP8ESLIao2a0D-6dQsn_aYyflyOnxBosesD2U-eBLoTvz1yKsHE-&expertname=OhUrTeach+Workspace&buddy_type=workbuddy-ai to use it!
+
 ## Members
 
 | Agent ID | Role |
@@ -52,10 +62,6 @@ Team (multi-role collaboration). The Head coordinates; members return results to
   `avatars/team.png`, `avatars/ohurteach-workspace-team-lead.png`, `avatars/ohurteach-workspace-researcher.png`, `avatars/ohurteach-workspace-planner.png`, `avatars/ohurteach-workspace-writer.png`, `avatars/ohurteach-workspace-reviewer.png`.
   Use original or licensed images: PNG or JPG, 512x512, at most 500KB each.
 - Helper scripts for external tools are not bundled. Bundled skills include the routing skill `ohurteach-workspace-router`, the native rule pack `ohurteach-rulepack` and the deterministic quiz exporter `ohurteach-quiz-export`.
-
-## Install
-
-Place this folder under `<WORKBUDDY_CONFIG_DIR>/plugins/marketplaces/my-experts/plugins/` and register it with the expert-manager registration script.
 
 ## Source repository
 
