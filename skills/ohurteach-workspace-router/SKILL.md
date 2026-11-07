@@ -19,14 +19,19 @@ Skill ini adalah **router prosedur**, bukan pembuat konten. Ia memastikan Head m
 
 | Permintaan guru (contoh) | Rute | Skill yang dibaca | Prasyarat |
 |---|---|---|---|
-| "Buat rencana pembelajaran/kuis/kerangka slide dari sumber saya" | Workflow agent existing (A/B/C sesuai permintaan) via Researcher→Planner→Writer→Reviewer | `ohurteach-rulepack` (dibaca Reviewer saat menilai draft) | Sumber berizin; konteks jenjang/mapel/tujuan diketahui atau ditanyakan |
+| Sesi baru dimulai (Fresh Summon) / sapaan (`"tes"`, `"halo"`) / prompt awal masih umum | **Intake Raka & Verifikasi Identitas LMS (tanpa membentuk tim dulu)**: jalankan `scripts/ohurteach_connector.py inspect-identity`, tanyakan konteks yang kurang (kelas & tujuan, sumber berizin, keluaran), dan bila belum terhubung tampilkan **kode pasangan aktual** (`OUT-XXXX-XXXX`) + tautan **[https://out.satz11.my.id/](https://out.satz11.my.id/)** di balasan pertama yang sama; tunggu jawaban guru | tidak ada skill anggota yang dipicu sebelum guru menjawab | Tunggu konfirmasi kelas & tujuan, sumber berizin, dan keluaran dari guru |
+| "Buat rencana pembelajaran/kuis/kerangka slide dari sumber saya (mis. BIO-01 di LMS)" | Workflow agent existing (A/B/C sesuai permintaan) via Researcher→Planner→Writer→Reviewer (+ baca sumber LMS via `ohurteach_connector.py search-sources` & simpan draf privat ke LMS via `ohurteach_connector.py save-private-draft`) | `ohurteach-rulepack` (dibaca Reviewer saat menilai draft) | Sumber berizin (ID versi LMS + path bagian, mis. `BIO-01-v1` / `BIO-01/Fotosintesis`, atau lampiran sekali pakai) & kriteria sudah dikonfirmasi guru |
 | "Pisahkan/ekspor kuis ini jadi berkas siswa dan guru" | Ekspor deterministik oleh Head (Phase 6) | `ohurteach-quiz-export` | Draft kuis gabungan sudah lolos review; berkas disimpan di folder privat run |
 | "Tampilkan/lanjutkan/ekspor PDF hasil run yang sudah ada" | Lane delivery Head (Phase 6), tanpa regenerasi | `ohurteach-quiz-export` hanya bila berkas hasil belum terpisah | `run_record` + berkas hasil sudah ada dan terverifikasi; konter review dipertahankan |
 | "Bikin/desain tampilan (UI) untuk saya" | **Bukan dikerjakan agent guru secara otomatis.** Arahkan ke lane development; sebut skill desain yang tersedia (Hallmark, antislop-ui, antislop-human, antislop-layoutmobile, antislop-copywriting) dan minta keputusan guru untuk membuka pekerjaan development | tidak ada skill guru yang dimuat | Pekerjaan UI = proyek development terpisah |
 
-## Pertanyaan konteks
+## Pertanyaan konteks & Intake Maksimal 3 Kategori
 
-Tanyakan hanya yang belum diketahui: (1) sumber berizin untuk tugas ini; (2) jenjang/mapel; (3) tujuan dan format keluaran; (4) kebutuhan khusus. Gunakan preferensi guru yang sudah dikonfirmasi dan mudah dikoreksi. Jangan menyimpulkan persona atau kemampuan siswa dari data pribadi.
+Saat kriteria belum lengkap, kelompokkan pertanyaan menjadi **maksimal 3 kategori** dan tunggu jawaban guru sebelum memanggil anggota tim atau menulis draf:
+1. **Keluaran & Tujuan** (format artefak yang ingin dibuat: RPP / kuis / kerangka slide / template sekolah, serta tujuan pembelajaran);
+2. **Sumber Materi** (sumber kanonis di Library LMS seperti `BIO-01` / `BIO-01-v1` atau lampiran sekali pakai; bila LMS belum terhubung tampilkan link **[Buka OhUrTeach](https://out.satz11.my.id)**);
+3. **Kelas & Kriteria Khusus** (jenjang/kelas/fase, alokasi waktu atau jumlah/bentuk soal, serta preferensi khusus yang dikonfirmasi guru).
+Jangan menyimpulkan persona atau kemampuan siswa dari data pribadi.
 
 ## Template-preservation
 

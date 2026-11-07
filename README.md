@@ -2,7 +2,7 @@
 
 OhUrTeach Workspace is a native Expert Team for Indonesian teachers. It turns one licensed source into a lesson plan, quiz and slide outline. Every draft is reviewed against a versioned rule pack, and final content waits for human approval before publication.
 
-Package ID: `ohurteach-workspace` | Version: 1.1.4 | Status: candidate package with bundled rule pack `RP-OHURTEACH v1.0.3`, deterministic quiz export skill `ohurteach-quiz-export`, routing skill `ohurteach-workspace-router`, PDF primary delivery contract (with Markdown/JSON working sources and DOCX support), editable PPTX pending presentation engine, invocation verified in native Summon sessions.
+Package ID: `ohurteach-workspace` | Version: 1.1.8 | Status: candidate package with intake-first Fresh Summon flow, canonical LMS Library MCP integration (`https://out.satz11.my.id`, synthetic source `BIO-01-v1`), bundled rule pack `RP-OHURTEACH v1.0.3`, deterministic quiz export skill `ohurteach-quiz-export`, routing skill `ohurteach-workspace-router`, PDF primary delivery contract (with Markdown/JSON working sources and DOCX support), editable PPTX pending presentation engine, invocation verified in native Summon sessions.
 
 ## Type
 

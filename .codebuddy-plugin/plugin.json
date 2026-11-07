@@ -1,11 +1,19 @@
 {
   "name": "ohurteach-workspace",
-  "version": "1.1.4",
-  "description": "A native Expert Team that turns one licensed source into a lesson plan, quiz and slide outline for Indonesian teachers, with rule-pack review and human approval before any publication.",
+  "version": "1.1.8",
+  "description": "A native Expert Team that turns one licensed source into a lesson plan, quiz and slide outline for Indonesian teachers, with intake-first workflow, one-time LMS pairing, rule-pack review and human approval before any publication.",
+  "homepage": "https://out.satz11.my.id",
   "author": {
     "name": "OhUrTeach"
   },
-  "keywords": ["education", "teacher", "lesson-plan", "quiz", "compliance-review", "indonesia"],
+  "keywords": [
+    "education",
+    "teacher",
+    "lesson-plan",
+    "quiz",
+    "compliance-review",
+    "indonesia"
+  ],
   "agents": [
     "./agents/ohurteach-workspace-team-lead.md",
     "./agents/ohurteach-workspace-researcher.md",
@@ -18,7 +26,6 @@
     "./skills/ohurteach-rulepack",
     "./skills/ohurteach-quiz-export"
   ],
-
   "expertType": "team",
   "agentName": "ohurteach-workspace-team-lead",
   "teamInfo": {
@@ -30,7 +37,6 @@
       "ohurteach-workspace-reviewer"
     ]
   },
-
   "displayName": {
     "en": "OhUrTeach Workspace",
     "zh": "OhUrTeach Workspace"
@@ -46,62 +52,101 @@
   "avatar": "avatars/team.png",
   "categoryId": "06-ContentCreative",
   "defaultInitPrompt": {
-    "zh": "请把我提供的教材来源转成教案、测验和幻灯片大纲，并用印尼语与我沟通。",
-    "en": "Turn the source material I provide into a lesson plan, quiz and slide outline, and communicate with me in Indonesian."
+    "zh": "你好 Raka，请用印尼语帮我准备教学材料，并先询问我想制作什么以及使用哪份教材来源。",
+    "en": "Halo Raka, bantu saya menyiapkan bahan ajar. Tanyakan dulu apa yang ingin saya buat dan sumber materi yang akan dipakai."
   },
   "plugin": "ohurteach-workspace",
   "tags": [
-    { "en": "Lesson Planning", "zh": "教案设计" },
-    { "en": "Quiz Design", "zh": "测验命题" },
-    { "en": "Compliance Review", "zh": "内容合规审核" }
+    {
+      "en": "Lesson Planning",
+      "zh": "教案设计"
+    },
+    {
+      "en": "Quiz Design",
+      "zh": "测验命题"
+    },
+    {
+      "en": "Compliance Review",
+      "zh": "内容合规审核"
+    }
   ],
   "quickPrompts": [
     {
-      "en": "Turn the source material I provide into a lesson plan, quiz and slide outline, and communicate with me in Indonesian.",
-      "zh": "请把我提供的教材来源转成教案、测验和幻灯片大纲，并用印尼语与我沟通。"
+      "en": "Halo Raka, bantu saya menyiapkan bahan ajar. Tanyakan dulu apa yang ingin saya buat dan sumber materi yang akan dipakai.",
+      "zh": "你好 Raka，请用印尼语帮我准备教学材料，并先询问我想制作什么以及使用哪份教材来源。"
     },
     {
-      "en": "Make a quiz only from my licensed material, with the teacher key kept separate from the student file.",
-      "zh": "只用我授权的材料出一份测验，教师答案与学生文件分开保存。"
+      "en": "Saya ingin membuat kuis dari materi berizin di Library LMS (misalnya BIO-01). Tanyakan dulu kelas dan kriterianya.",
+      "zh": "我想用 LMS 资料库里的授权教材（例如 BIO-01）出一份测验，请先向我确认班级和出题要求。"
     },
     {
-      "en": "Fill my school template using a copy, and check layout before and after.",
-      "zh": "用副本把内容填入学校模板，并检查填写前后的版式。"
+      "en": "Saya ingin menyusun RPP atau mengisi template sekolah. Mari cek dulu sumber materi di LMS dan bagian yang ingin diisi.",
+      "zh": "我想准备一份教案（RPP）或填写学校模板，请先帮我核对 LMS 教材来源与要填写的部分。"
     }
   ],
   "members": [
     {
       "id": "ohurteach-workspace-team-lead",
-      "displayName": { "en": "Raka", "zh": "Raka" },
-      "profession": { "en": "Learning Content Director", "zh": "教学内容总监" },
+      "displayName": {
+        "en": "Raka",
+        "zh": "Raka"
+      },
+      "profession": {
+        "en": "Learning Content Director",
+        "zh": "教学内容总监"
+      },
       "avatar": "avatars/ohurteach-workspace-team-lead.png",
       "role": "lead"
     },
     {
       "id": "ohurteach-workspace-researcher",
-      "displayName": { "en": "Rani", "zh": "Rani" },
-      "profession": { "en": "Source Researcher", "zh": "来源研究员" },
+      "displayName": {
+        "en": "Rani",
+        "zh": "Rani"
+      },
+      "profession": {
+        "en": "Source Researcher",
+        "zh": "来源研究员"
+      },
       "avatar": "avatars/ohurteach-workspace-researcher.png",
       "role": "member"
     },
     {
       "id": "ohurteach-workspace-planner",
-      "displayName": { "en": "Dimas", "zh": "Dimas" },
-      "profession": { "en": "Learning Planner", "zh": "学习规划师" },
+      "displayName": {
+        "en": "Dimas",
+        "zh": "Dimas"
+      },
+      "profession": {
+        "en": "Learning Planner",
+        "zh": "学习规划师"
+      },
       "avatar": "avatars/ohurteach-workspace-planner.png",
       "role": "member"
     },
     {
       "id": "ohurteach-workspace-writer",
-      "displayName": { "en": "Nara", "zh": "Nara" },
-      "profession": { "en": "Learning Content Writer", "zh": "教学内容撰稿人" },
+      "displayName": {
+        "en": "Nara",
+        "zh": "Nara"
+      },
+      "profession": {
+        "en": "Learning Content Writer",
+        "zh": "教学内容撰稿人"
+      },
       "avatar": "avatars/ohurteach-workspace-writer.png",
       "role": "member"
     },
     {
       "id": "ohurteach-workspace-reviewer",
-      "displayName": { "en": "Sinta", "zh": "Sinta" },
-      "profession": { "en": "Rule Pack Reviewer", "zh": "规则审核员" },
+      "displayName": {
+        "en": "Sinta",
+        "zh": "Sinta"
+      },
+      "profession": {
+        "en": "Rule Pack Reviewer",
+        "zh": "规则审核员"
+      },
       "avatar": "avatars/ohurteach-workspace-reviewer.png",
       "role": "member"
     }
